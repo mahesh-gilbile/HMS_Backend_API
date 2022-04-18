@@ -7,12 +7,12 @@ mysql = MySQL()
 def create_app():
     app = Flask(__name__)
     CORS(app)
-    app.config['MYSQL_HOST'] = 'sql6.freesqldatabase.com'
-    app.config['MYSQL_USER'] = 'sql6480839'
-    app.config['MYSQL_PASSWORD'] = 'y1uW3rfc1M'
-    app.config['MYSQL_DB'] = 'sql6480839'
-
-
+    app.config['MYSQL_HOST'] = 'nikhilspatil2622.mysql.pythonanywhere-services.com'
+    app.config['MYSQL_USER'] = 'root'
+    app.config['MYSQL_PASSWORD'] = ''
+    app.config['MYSQL_DB'] = 'hostel_management_system'
+    
+    
     mysql = MySQL(app)
 
     app.config['SECRET_KEY'] = 'hjshjhdjah kjshkjdhjs'
@@ -22,12 +22,14 @@ def create_app():
     from .mess import mess
     from .security import security
     from .warden import warden
+    from .secretory import secretory
 
     app.register_blueprint(auth , url_prefix='/auth')
     app.register_blueprint(student , url_prefix='/student')
     app.register_blueprint(mess , url_prefix='/mess')
     app.register_blueprint(security , url_prefix="/security")
     app.register_blueprint(warden , url_prefix='/warden')
+    app.register_blueprint(secretory , url_prefix='/secretory')
 
     return app
 

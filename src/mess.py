@@ -38,6 +38,7 @@ def change_Password(ID):
             curr_pass = curr_pass[0]
             if curr_pass == currentPassword:
                 cur.execute("UPDATE mess_staff SET Password = %s WHERE MessStaff_ID = %s",(newPassword , ID))
+                mysql.connection.commit()
                 cur.close()
                 return jsonify("Password Update Successfully!")
             else:
@@ -170,10 +171,50 @@ def CheckQRTime() -> str:
         value = "Nothing"
     return value
 
+
+@mess.route('/leaves/<ID>',methods=['POST','GET'])
+def leaves(ID):
+    if request.method == 'POST':
+        data = request.data
+        data = json.loads(data)
+        fromDate = data.get('from')
+        toDate = data.get('to')
+        days = data.get('days')
+        reason = data.get('reason')
+        cur = mysql.connection.cursor()
+        cur.execute("INSERT INTO `leaves`(`Staff_Type`, `From_Date`, `To_Date`, `Day`, `Reason`, `Status`,`Staff_ID`) VALUES ('Mess',%s,%s,%s,%s,'Pending',%s)",(fromDate,toDate,days,reason,ID))
+        mysql.connection.commit()
+        return jsonify("Leaves Apply SuccessFully...!")
+    elif request.method == 'GET':
+        cur = mysql.connection.cursor()
+        cur.execute("SELECT * FROM `leaves` WHERE Staff_ID = %s AND Staff_Type = 'Mess'",(ID))
+        d = cur.fetchall()
+        data = [dict(zip(("ID","StaffType","FromDate","ToDate","Day","Reason","Status","DescisionTakenByType","StaffID","DecisionTakenByID","DescisionTakenByName"),vv)) for vv in d]
+        return jsonify(data)
+
+@mess.route('/getTodayMessHistory/<ID>',methods=['GET'])
+def getTodayMessHistory(ID):
+    if request.method == 'GET':
+        cur = mysql.connection.cursor()
+        today = getTodayformattedDate()
+        cur.execute("SELECT sd.First_Name , sd.Middle_Name , sd.Last_Name , me.Type , me.Time FROM mess_info as mi , qr_for_mess as qr , mess_entry as me , student_details as sd WHERE mi.messStaff_Id = %s AND mi.mess_id = qr.Mess_ID AND qr.Date = %s AND qr.QR_ID = me.QR_ID AND me.Student_ID = sd.Student_ID",(ID,today))
+        d = cur.fetchall()
+        data = [dict(zip(("FirstName","MiddleName","LastName","Type","ScanTime"),vv)) for vv in d]
+        return jsonify(data)
+
+@mess.route('/getQRHistory/<ID>',methods=['GET'])
+def getQRHistory(ID):
+    if request.method == 'GET':
+        cur = mysql.connection.cursor()
+        cur.execute("SELECT ms.First_Name , ms.Middle_Name , ms.Last_Name , qr.QR_ID , qr.Time , qr.Date , qr.Type FROM qr_for_mess AS qr , mess_staff as ms WHERE qr.Mess_ID = (SELECT Mess_ID FROM mess_info WHERE MessStaff_ID = %s) AND qr.MessStaff_ID = ms.MessStaff_ID",(ID))
+        d = cur.fetchall()
+        data = [dict(zip(("FirstName","MiddleName","LastName","QR_ID","Time","Date","Type"),vv)) for vv in d]
+        return jsonify(data)
+
+
 ###Common Function
 
 #Get Present Time
-
 def getTime() -> str:
     t = time.localtime()
     now = time.strftime("%H:%M:%S",t)

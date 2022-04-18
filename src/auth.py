@@ -35,6 +35,11 @@ def login():
             id = cur.fetchone()
             if(id == None):
                 id = None
+        elif role == 'Secretory':
+            cur.execute("SELECT Secretory_ID FROM secretory WHERE Email = %s AND Password = %s",(username , password))
+            id = cur.fetchone()
+            if(id == None):
+                id = None
         cur.close()
         if(id != None):
             return jsonify(role = role , id = id[0]) , 200

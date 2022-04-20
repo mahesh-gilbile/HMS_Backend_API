@@ -1,4 +1,3 @@
-from crypt import methods
 from ntpath import join
 from MySQLdb import Time
 from flask import Blueprint , request , jsonify

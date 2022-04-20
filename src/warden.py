@@ -1,4 +1,3 @@
-from crypt import methods
 from flask import Blueprint , request , jsonify
 from . import mysql
 import json
@@ -31,6 +30,7 @@ def change_pass(ID):
             curr_pass = curr_pass[0]
             if curr_pass == currentPassword:
                 cur.execute("UPDATE warden_details SET Password = %s WHERE Warden_ID = %s",(newPassword , ID))
+                mysql.connection.commit()
                 cur.close()
                 return jsonify("Password Update Successfully!")
             else:

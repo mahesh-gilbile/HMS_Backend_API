@@ -1,4 +1,3 @@
-from crypt import methods
 from datetime import date
 from multiprocessing import connection
 import random

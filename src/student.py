@@ -1,4 +1,3 @@
-from crypt import methods
 from logging.config import valid_ident
 import uuid
 from flask import Blueprint , request, jsonify
@@ -34,6 +33,7 @@ def change_pass(ID):
             curr_pass = curr_pass[0]
             if curr_pass == currentPassword:
                 cur.execute("UPDATE student_details SET Password = %s WHERE student_ID = %s",(newPassword,ID))
+                mysql.connection.commit()
                 cur.close()
                 return jsonify("Password Update Successfully!")            
             else:

@@ -15,7 +15,7 @@ mess = Blueprint('mess',__name__)
 def get_Mess(ID):
     if request.method == 'GET':
         cur = mysql.connection.cursor()
-        cur.execute("SELECT * FROM mess_staff WHERE MessStaff_ID = %s",(ID))
+        cur.execute("SELECT * FROM mess_staff WHERE MessStaff_ID = %s",[ID])
         result = cur.fetchone()
         return jsonify(result)
 

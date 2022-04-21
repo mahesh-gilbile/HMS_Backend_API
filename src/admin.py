@@ -63,13 +63,13 @@ def LeaveDecision(ID):
         mysql.connection.commit()
         return jsonify("Status Updated Successfully....!")
 
-@admin.route('/aboutSecretory',methods=['GET','POST'])
+@admin.route('/aboutSecretory',methods=['GET','POST','PUT'])
 def aboutSecretory():
     if request.method == 'GET':
         cur = mysql.connection.cursor()
         cur.execute("SELECT * FROM secretory")
         d = cur.fetchall()
-        data = [dict(zip(("SecretoryID","FirstName","MiddleName","LastName","Age","Gender","Nationality","Gmail","MobileNo","DOB","Address"),vv)) for vv in d]
+        data = [dict(zip(("SecretoryID","FirstName","MiddleName","LastName","Age","Gender","Gmail","MobileNo","DOB","Address"),vv)) for vv in d]
         return jsonify(data)
     elif request.method == 'POST':
         data = request.data
@@ -79,25 +79,38 @@ def aboutSecretory():
         ln = data.get('ln')
         age = data.get('age')
         gender = data.get('gender')
-        citizen = data.get('citizen')
         email = data.get('email')
         mobileno = data.get('mobileNo')
         dob = data.get('dob')
         add = data.get('add')
         password = '1234'
         cur = mysql.connection.cursor()
-        cur.execute("INSERT INTO `secretory`(`First_Name`, `Middle_Name`, `Last_Name`, `Age`, `Gender`, `Citizen`, `Email`, `Mobile_Number`, `DOB`, `Address`, `Password`) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",(fn,mn,ln,age,gender,citizen,email,mobileno,dob,add,password))
+        cur.execute("INSERT INTO `secretory`(`First_Name`, `Middle_Name`, `Last_Name`, `Age`, `Gender`, `Email`, `Mobile_Number`, `DOB`, `Address`, `Password`) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",(fn,mn,ln,age,gender,email,mobileno,dob,add,password))
         mysql.connection.commit()
-        return jsonify("Secretory Added Successfully....!")
+        return jsonify("Secretory Information Added Successfully....!") , 200
+    elif request.method == 'PUT':
+        data = request.data
+        data = json.loads(data)
+        sid = data.get('id')
+        fn = data.get('fn')
+        mn = data.get('mn')
+        ln = data.get('ln')
+        gender = data.get('gender')
+        mobileno = data.get('mobileNo')
+        add = data.get('add')
+        cur = mysql.connection.cursor()
+        cur.execute("UPDATE `secretory` SET `First_Name`= %s,`Middle_Name`= %s,`Last_Name`= %s,`Gender`= %s,`Mobile_Number`= %s,`Address`= %s WHERE secretory_id = %s",(fn, mn, ln, gender, mobileno, add, sid))
+        mysql.connection.commit()
+        return jsonify("Secretory Information Updated Successfully....!") , 200
 
 
-@admin.route('/aboutWarden',methods=['GET','POST'])
+@admin.route('/aboutWarden',methods=['GET','POST','PUT'])
 def aboutWarden():
     if request.method == 'GET':
         cur = mysql.connection.cursor()
         cur.execute("SELECT * FROM warden_details")
         d = cur.fetchall()
-        data = [dict(zip(("WardenID","FirstName","MiddleName","LastName","Age","Gender","Nationality","Gmail","MobileNo","DOB","Address"),vv)) for vv in d]
+        data = [dict(zip(("WardenID","FirstName","MiddleName","LastName","Age","Gender","Gmail","MobileNo","DOB","Address"),vv)) for vv in d]
         return jsonify(data)
     elif request.method == 'POST':
         data = request.data
@@ -116,16 +129,31 @@ def aboutWarden():
         cur = mysql.connection.cursor()
         cur.execute("INSERT INTO `warden_details`(`warden_ID`,`First_Name`, `Middle_Name`, `Last_Name`, `Age`, `Gender`, `Email`, `Mobile_Number`, `DOB`, `Address`, `Password`) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",(warden_ID,fn,mn,ln,age,gender,email,mobileno,dob,add,password))
         mysql.connection.commit()
-        return jsonify("Warden Added Successfully....!")
+        return jsonify("Warden Informtion Added Successfully....!") , 200
+    elif request.method == 'PUT':
+        data = request.data
+        data = json.loads(data)
+        sid = data.get('id')
+        fn = data.get('fn')
+        mn = data.get('mn')
+        ln = data.get('ln')
+        gender = data.get('gender')
+        mobileno = data.get('mobileNo')
+        add = data.get('add')
+        cur = mysql.connection.cursor()
+        cur.execute("UPDATE `warden_details` SET `First_Name`= %s,`Middle_Name`= %s,`Last_Name`= %s,`Gender`= %s,`Mobile_Number`= %s,`Address`= %s WHERE warden_id = %s",(fn, mn, ln, gender, mobileno, add, sid))
+        mysql.connection.commit()
+        return jsonify("Warden Information Updated Successfully....!") , 200
 
 
-@admin.route('/aboutMess',methods=['GET','POST'])
+
+@admin.route('/aboutMess',methods=['GET','POST','PUT'])
 def aboutMess():
     if request.method == 'GET':
         cur = mysql.connection.cursor()
         cur.execute("SELECT * FROM mess_staff")
         d = cur.fetchall()
-        data = [dict(zip(("MessStaffID","FirstName","MiddleName","LastName","Age","Gender","Nationality","Gmail","MobileNo","DOB","Address"),vv)) for vv in d]
+        data = [dict(zip(("MessStaffID","FirstName","MiddleName","LastName","Age","Gender","Gmail","MobileNo","DOB","Address"),vv)) for vv in d]
         return jsonify(data)
     elif request.method == 'POST':
         data = request.data
@@ -144,15 +172,30 @@ def aboutMess():
         cur = mysql.connection.cursor()
         cur.execute("INSERT INTO `mess_staff`(`MessStaff_ID`,`First_Name`, `Middle_Name`, `Last_Name`, `Age`, `Gender`, `Email`, `Mobile_Number`, `DOB`, `Address`, `Password`) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",(ID,fn,mn,ln,age,gender,email,mobileno,dob,add,password))
         mysql.connection.commit()
-        return jsonify("Mess Staff Added Successfully....!")
+        return jsonify("Mess Staff Informtion Added Successfully....!") , 200
+    elif request.method == 'PUT':
+        data = request.data
+        data = json.loads(data)
+        sid = data.get('id')
+        fn = data.get('fn')
+        mn = data.get('mn')
+        ln = data.get('ln')
+        gender = data.get('gender')
+        mobileno = data.get('mobileNo')
+        add = data.get('add')
+        cur = mysql.connection.cursor()
+        cur.execute("UPDATE `mess_staff` SET `First_Name`= %s,`Middle_Name`= %s,`Last_Name`= %s,`Gender`= %s,`Mobile_Number`= %s,`Address`= %s WHERE MessStaff_id = %s",(fn, mn, ln, gender, mobileno, add, sid))
+        mysql.connection.commit()
+        return jsonify("Mess Staff Information Updated Successfully....!") , 200
 
-@admin.route('/aboutSecurity',methods=['GET','POST'])
+
+@admin.route('/aboutSecurity',methods=['GET','POST','PUT'])
 def aboutSecurity():
     if request.method == 'GET':
         cur = mysql.connection.cursor()
         cur.execute("SELECT * FROM security_guard")
         d = cur.fetchall()
-        data = [dict(zip(("SecurityGuardID","FirstName","MiddleName","LastName","Age","Gender","Nationality","Gmail","MobileNo","DOB","Address"),vv)) for vv in d]
+        data = [dict(zip(("SecurityGuardID","FirstName","MiddleName","LastName","Age","Gender","Gmail","MobileNo","DOB","Address"),vv)) for vv in d]
         return jsonify(data)
     elif request.method == 'POST':
         data = request.data
@@ -171,8 +214,40 @@ def aboutSecurity():
         cur = mysql.connection.cursor()
         cur.execute("INSERT INTO `security_guard`(`SecurityGuard_ID`,`First_Name`, `Middle_Name`, `Last_Name`, `Age`, `Gender`, `Email`, `Mobile_Number`, `DOB`, `Address`, `Password`) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",(ID,fn,mn,ln,age,gender,email,mobileno,dob,add,password))
         mysql.connection.commit()
-        return jsonify("Security Guard Added Successfully....!")
-    
+        return jsonify("Security Guard Information Added Successfully....!") , 200
+    elif request.method == 'PUT':
+        data = request.data
+        data = json.loads(data)
+        sid = data.get('id')
+        fn = data.get('fn')
+        mn = data.get('mn')
+        ln = data.get('ln')
+        gender = data.get('gender')
+        mobileno = data.get('mobileNo')
+        add = data.get('add')
+        cur = mysql.connection.cursor()
+        cur.execute("UPDATE `security_guard` SET `First_Name`= %s,`Middle_Name`= %s,`Last_Name`= %s,`Gender`= %s,`Mobile_Number`= %s,`Address`= %s WHERE SecurityGuard_ID = %s",(fn, mn, ln, gender, mobileno, add, sid))
+        mysql.connection.commit()
+        return jsonify("Security Guard Information Updated Successfully....!") , 200
+
+@admin.route('/getEmails/<role>',methods=['GET'])
+def getEmails(role):
+    if request.method == 'GET':
+        cur = mysql.connection.cursor()
+        if role == 'Warden':
+            cur.execute("SELECT email FROM warden_details")
+            email = cur.fetchall()
+        elif role == 'Security':
+            cur.execute("SELECT email FROM security_guard")
+            email = cur.fetchall()
+        elif role == 'Mess':
+            cur.execute("SELECT email FROM mess_staff")
+            email = cur.fetchall()
+        elif role == 'Secretory':
+            cur.execute("SELECT email FROM secretory")
+            email = cur.fetchall()
+        data = [dict(zip(("e"),vv)) for vv in email]
+        return jsonify(data)
 
 #Unique ID
 def getUniqueID(string) -> str:

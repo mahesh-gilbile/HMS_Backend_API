@@ -8,7 +8,7 @@ warden = Blueprint('warden',__name__)
 def get_Warden(ID):
     if request.method == 'GET':
         curr = mysql.connection.cursor()
-        curr.execute("SELECT * FROM warden_details WHERE Warden_ID = %s",(ID))
+        curr.execute("SELECT * FROM warden_details WHERE Warden_ID = %s",[ID])
         result = curr.fetchone()
         return jsonify(result)
 
@@ -41,7 +41,7 @@ def change_pass(ID):
 def getHostelDetails(Warden_ID):
     if request.method == 'GET':
         cur = mysql.connection.cursor()
-        cur.execute("SELECT * FROM hostel_details WHERE warden_id = %s",(Warden_ID))
+        cur.execute("SELECT * FROM hostel_details WHERE warden_id = %s",[Warden_ID])
         data = cur.fetchone()
         HostelID = data[0]
         HostelName = data[1]
@@ -107,10 +107,10 @@ def leaves(ID):
 def LeaveDecision(ID):
     if request.method == 'GET':
         cur = mysql.connection.cursor()
-        cur.execute("Select * from (SELECT securityguard_id , First_Name , Middle_Name , Last_name FROM security_guard WHERE gate_id = (SELECT gate_id FROM `gate_info` WHERE hostel_id = (SELECT hostel_ID FROM `hostel_details` WHERE warden_id = %s))) as security_table , leaves as le WHERE le.Staff_Type = 'Security' AND le.Staff_ID = security_table.securityguard_id",(ID))
+        cur.execute("Select * from (SELECT securityguard_id , First_Name , Middle_Name , Last_name FROM security_guard WHERE gate_id = (SELECT gate_id FROM `gate_info` WHERE hostel_id = (SELECT hostel_ID FROM `hostel_details` WHERE warden_id = %s))) as security_table , leaves as le WHERE le.Staff_Type = 'Security' AND le.Staff_ID = security_table.securityguard_id",[ID])
         d1 = cur.fetchall()
         data1 = [dict(zip(("SecurityGuard_ID","First_Name","Middle_Name","Last_Name","ID","StaffType","FromDate","ToDate","Day","Reason","Status","DecisionTakenByType","StaffID","DecisionTakenByID","DecisionTakenByName"),vv)) for vv in d1]
-        cur.execute("SELECT * FROM (SELECT mess_staff.messStaff_ID , mess_staff.First_name , mess_staff.Middle_name ,mess_staff.Last_name FROM mess_staff WHERE messStaff_ID = (SELECT MessStaff_ID FROM mess_info WHERE Hostel_ID = (SELECT hostel_id FROM hostel_details WHERE warden_id = %s))) as msi , leaves as le WHERE le.Staff_Type = 'Mess' AND le.Staff_ID = msi.messStaff_ID",(ID))
+        cur.execute("SELECT * FROM (SELECT mess_staff.messStaff_ID , mess_staff.First_name , mess_staff.Middle_name ,mess_staff.Last_name FROM mess_staff WHERE messStaff_ID = (SELECT MessStaff_ID FROM mess_info WHERE Hostel_ID = (SELECT hostel_id FROM hostel_details WHERE warden_id = %s))) as msi , leaves as le WHERE le.Staff_Type = 'Mess' AND le.Staff_ID = msi.messStaff_ID",[ID])
         d2 = cur.fetchall()
         data2 = [dict(zip(("MessStaff_ID","First_Name","Middle_Name","Last_Name","ID","StaffType","FromDate","ToDate","Day","Reason","Status","DecisionTakenByType","StaffID","DecisionTakenByID","DecisionTakenByName"),vv)) for vv in d2]
         data = data1 + data2

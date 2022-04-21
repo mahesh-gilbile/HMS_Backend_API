@@ -9,7 +9,7 @@ secretory = Blueprint('secretory',__name__)
 def get_Secretory(ID):
     if request.method == 'GET':
         cur = mysql.connection.cursor()
-        cur.execute("SELECT * FROM secretory WHERE secretory_ID = %s",(ID))
+        cur.execute("SELECT * FROM secretory WHERE secretory_ID = %s",[ID])
         result = cur.fetchone()
         return jsonify(result)
 

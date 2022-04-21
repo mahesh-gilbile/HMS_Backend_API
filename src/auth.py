@@ -40,6 +40,11 @@ def login():
             id = cur.fetchone()
             if(id == None):
                 id = None
+        elif role == 'Admin':
+            cur.execute("SELECT admin_ID FROM admin WHERE Email = %s AND Password = %s",(username , password))
+            id = cur.fetchone()
+            if(id == None):
+                id = None
         cur.close()
         if(id != None):
             return jsonify(role = role , id = id[0]) , 200

@@ -15,7 +15,7 @@ security = Blueprint('security',__name__)
 def get_Security(ID):
     if request.method == 'GET':
         curr = mysql.connection.cursor()
-        curr.execute("SELECT * FROM security_guard WHERE SecurityGuard_ID = %s",(ID))
+        curr.execute("SELECT * FROM security_guard WHERE SecurityGuard_ID = %s",[ID])
         result = curr.fetchone()
         return jsonify(result)
 

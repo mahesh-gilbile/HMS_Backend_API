@@ -12,7 +12,7 @@ student = Blueprint('student',__name__)
 def get_Student(ID):
     if request.method == 'GET':
         cur = mysql.connection.cursor()
-        cur.execute("SELECT * FROM student_details as sd , student_education_details as sed WHERE sd.Student_ID = %s AND sed.Student_ID = sd.Student_ID",(ID))
+        cur.execute("SELECT * FROM student_details as sd , student_education_details as sed WHERE sd.Student_ID = %s AND sed.Student_ID = sd.Student_ID",[ID])
         result = cur.fetchone()
     return jsonify(data = result)
 
@@ -44,7 +44,7 @@ def change_pass(ID):
 def guardian_Details(ID):
     if request.method == 'GET': 
         cur = mysql.connection.cursor()
-        cur.execute("SELECT * FROM guardian_details WHERE Student_ID = %s",(ID))
+        cur.execute("SELECT * FROM guardian_details WHERE Student_ID = %s",[ID])
         data = cur.fetchone()
         return jsonify(data) , 200
     
@@ -199,7 +199,7 @@ def ScanForGate(Std_ID):
 def getMessHistory(ID):
     if request.method == 'GET':
         cur = mysql.connection.cursor()
-        cur.execute("SELECT me.Date , me.Type , mh.Food_Menu , mh.MS_ID FROM mess_entry as me , mess_history as mh , qr_for_mess as qr WHERE me.Student_ID = 3 AND me.QR_ID = qr.QR_ID AND qr.Mess_ID = mh.Mess_ID AND me.Date = mh.Date AND me.Type = mh.Food_Type")
+        cur.execute("SELECT me.Date , me.Type , mh.Food_Menu , mh.MS_ID FROM mess_entry as me , mess_history as mh , qr_for_mess as qr WHERE me.Student_ID = %s AND me.QR_ID = qr.QR_ID AND qr.Mess_ID = mh.Mess_ID AND me.Date = mh.Date AND me.Type = mh.Food_Type",(ID))
         d = cur.fetchall()
         data = [dict(zip(("Date","Type","FoodMenu","MSID"),vv)) for vv in d]
         return jsonify(data)
@@ -211,7 +211,22 @@ def getGateHistory(ID):
         cur.execute("SELECT * FROM gate_entry WHERE student_id = %s",(ID))
         d = cur.fetchall()
         data = [dict(zip(("QRSacnID","QRID","StudentID","Time","Date","Status"),vv)) for vv in d]
-        return jsonify(data)
+        return jsonify({"GateInfo":data})
+
+@student.route('/getFees/<ID>',methods=['GET'])
+def getFeesInfo(ID):
+    if request.method == 'GET':
+        cur = mysql.connection.cursor()
+        cur.execute("SELECT count(me.QrScanID) , me.type , mf.Amount , count(me.QrScanID)*Amount as totalAmount FROM `mess_entry` as me , mess_fees as mf WHERE me.student_id = %s and me.Type = mf.Food_Type group by me.type;",[ID])
+        d = cur.fetchall()
+        messFees = [dict(zip(("Count" , "Type" , "Amount" , "TotalAmount"),vv)) for vv in d]
+        cur.execute("SELECT * FROM hostel_fees WHERE student_id = %s",[ID])
+        d1 = cur.fetchall()
+        hostelFees = [dict(zip(("ID" , "StudentID" , "Amount" , "Year" , "JoiningDate"),vv)) for vv in d1]
+        cur.execute("SELECT p.Payment_ID , p.Student_ID , p.Date , p.Time , p.Amount , p.Payment_Method , s.First_Name , s.Middle_Name , s.Last_Name FROM payment as p , secretory as s WHERE student_id = %s AND s.Secretory_ID = p.DoneBySecretoryID;",[ID])
+        d2 = cur.fetchall()
+        paidFees = [dict(zip(("PaymentID" , "StudentID" , "Date" , "Time" , "Amount" , "PaymentMethod" , "SecretoryFN", "SecretoryMN", "SecretoryLN"),vv)) for vv in d2]
+        return jsonify({"MessFees" : messFees , "HostelFees" : hostelFees , "FeesPaid" : paidFees})
 
 
 ###Common Function

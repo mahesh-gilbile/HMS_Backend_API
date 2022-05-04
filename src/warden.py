@@ -127,3 +127,16 @@ def LeaveDecision(ID):
         cur.execute("UPDATE leaves SET Status = %s , Decision_takenby_type = %s , Decison_takenby_ID = %s , Decision_takenby_Name = %s WHERE ID = %s",(Status , DecisionTakenByType , ID , name , l_ID))
         mysql.connection.commit()
         return jsonify("Status Updated Successfully....!")
+
+@warden.route('/getGateHistory/<ID>',methods=['GET'])
+def getGateHistory(ID):
+    if request.method == 'GET':
+        cur = mysql.connection.cursor()
+        cur.execute("SELECT * FROM gate_entry WHERE student_id = %s",(ID))
+        d = cur.fetchall()
+        data = [dict(zip(("QRSacnID","QRID","StudentID","Time","Date","Status"),vv)) for vv in d]
+        cur.execute("SELECT First_Name , Middle_Name , Last_Name FROM student_details WHERE student_id = %s",(ID))
+        d1 = cur.fetchall()
+        data1 = [dict(zip(("FirstName","MiddleName","LastName"),vv)) for vv in d1]
+        return jsonify({"GateInfo":data , "StudentName":data1[0]})
+

@@ -24,6 +24,9 @@ def create_app():
     from .warden import warden
     from .secretory import secretory
     from .admin import admin
+    app.route("/",methods=['GET'])
+    def hey():
+        return "Hey"
 
     app.register_blueprint(auth , url_prefix='/auth')
     app.register_blueprint(student , url_prefix='/student')

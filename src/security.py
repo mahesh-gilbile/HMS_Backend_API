@@ -111,7 +111,6 @@ def getQRIDInfo(ID):
         return jsonify(data)
 
 
-
 ###Common Function
 
 #Get Present Time

@@ -28,7 +28,7 @@ def change_pass(ID):
             return jsonify("Please Check your Password!") , 404
         else:
             cur = mysql.connection.cursor()
-            cur.execute("SELECT Password FROM student_details WHERE student_ID = %s",(ID))
+            cur.execute("SELECT Password FROM student_details WHERE student_ID = %s",[ID])
             curr_pass = cur.fetchone()
             curr_pass = curr_pass[0]
             if curr_pass == currentPassword:
@@ -52,9 +52,11 @@ def guardian_Details(ID):
 def getRoomDetails(Std_ID):
     if request.method == 'GET':
         cur = mysql.connection.cursor()
-        cur.execute("SELECT Room_ID FROM room_allocate WHERE Student_ID = %s",(Std_ID))
+        cur.execute("SELECT Room_ID FROM room_allocate WHERE Student_ID = %s",[Std_ID])
         Room_ID = cur.fetchone()
-        cur.execute("SELECT Wing_Name FROM wing_details WHERE (Wing_ID = (SELECT Wing_ID FROM room_details WHERE Room_ID = %s))",(Room_ID))
+        if(Room_ID == None):
+            return jsonify("Student is not alloted") , 404
+        cur.execute("SELECT Wing_Name FROM wing_details WHERE (Wing_ID = (SELECT Wing_ID FROM room_details WHERE Room_ID = %s))",[Room_ID])
         Wing_Name = cur.fetchone()
         cur.execute("SELECT sd.Student_ID , sd.First_Name , sd.Middle_Name , sd.Last_Name , sd.Email , sd.Mobile_Number FROM student_details AS sd , room_allocate AS ra WHERE ra.Room_ID = %s AND ra.Student_ID != %s AND sd.Student_ID = ra.Student_ID",(Room_ID , Std_ID))
         data = cur.fetchall()
@@ -86,7 +88,7 @@ def scanQRMess(Std_ID):
                 Time1 = getTime()
                 cur.execute("INSERT INTO `mess_entry`(`QR_ID`,`Student_ID`,`Time`,`Date`,`Type`) VALUES(%s, %s, %s, %s, %s)",(QR_ID , Std_ID , Time1 , Date1, Type))
                 mysql.connection.commit()
-                cur.execute("SELECT First_Name , Last_Name FROM mess_staff WHERE MessStaff_ID = %s",(MessStaff_ID))
+                cur.execute("SELECT First_Name , Last_Name FROM mess_staff WHERE MessStaff_ID = %s",[MessStaff_ID])
                 data1 = cur.fetchone()
                 fn = data1[0]
                 ln = data1[1]
@@ -102,6 +104,16 @@ def scanQRMess(Std_ID):
                 ln = data1[1]
                 return jsonify({"MessStaffName": fn + " " +  ln , "Date" : Date1 , "Time" : Time1 , "Type" : Type}) , 200
 
+@student.route('checkstdAlot/<ID>',methods=['GET'])
+def checkstdalt(ID):
+    if request.method == 'GET':
+        cur = mysql.connection.cursor()
+        cur.execute("SELECT RA_ID FROM `room_allocate` WHERE Student_ID = %s;",[ID])
+        d = cur.fetchone()
+        if(d == None):
+            return jsonify("False") , 200
+        else:
+            return jsonify("True") , 200
 
 
 def CheckQRTime() -> str:
@@ -130,7 +142,7 @@ def ScanForGate(Std_ID):
         d = datetime.today() - timedelta(hours=0, minutes=60)
         nowTime = d.strftime('%H:%M:%S')
         #QR Code is valid for one hour check
-        if(nowTime > Time):
+        if(nowTime < Time):
             cur.execute("SELECT QR_ID FROM qr_for_gate WHERE Time = %s AND Date = %s AND QR_Code1 = %s AND QR_Code2 = %s",(Time,date,Password1,Password2))
             n = cur.fetchone()
             #Qr Code is exist or not
@@ -139,7 +151,7 @@ def ScanForGate(Std_ID):
                 return jsonify("QR Code is Wrong...!") , 404
             else:
                 QR_ID = n[0]
-                cur.execute("SELECT hostel_id FROM wing_details WHERE wing_id = (SELECT wing_id FROM room_details WHERE room_id = (SELECT room_id FROM room_allocate WHERE student_id = %s))",(Std_ID))
+                cur.execute("SELECT hostel_id FROM wing_details WHERE wing_id = (SELECT wing_id FROM room_details WHERE room_id = (SELECT room_id FROM room_allocate WHERE student_id = %s))",[Std_ID])
                 data = cur.fetchone()
                 hostelIDFromStudentID = data[0]
                 cur.execute("SELECT Hostel_id FROM gate_info WHERE gate_id = (SELECT gate_id FROM qr_for_gate WHERE qr_id = %s)",[QR_ID])
@@ -147,7 +159,7 @@ def ScanForGate(Std_ID):
                 hostelIDFromQRID = data1[0]
                 #Check if student are from same hostel when scaning QR
                 if(hostelIDFromQRID == hostelIDFromStudentID):
-                    cur.execute("SELECT MAX(QR_Scan_ID) FROM `gate_entry` WHERE student_id = %s",(Std_ID))
+                    cur.execute("SELECT MAX(QR_Scan_ID) FROM `gate_entry` WHERE student_id = %s",[Std_ID])
                     data2 = cur.fetchone()
                     #check last status of student
                     if(data2[0] == None):
@@ -184,7 +196,7 @@ def ScanForGate(Std_ID):
                         SecurityGuard_Name = [dict(zip(("FirstName","MiddleName","LastName"),vv)) for vv in d2]
                         return jsonify({"QR_Info" : QR_Info[0] , "SecurityGuardName" : SecurityGuard_Name[0]}) , 200
                 else:
-                    cur.execute("SELECT hostel_Name FROM hostel_details WHERE hostel_id=%s",(hostelIDFromQRID))
+                    cur.execute("SELECT hostel_Name FROM hostel_details WHERE hostel_id=%s",[hostelIDFromQRID])
                     data = cur.fetchone()
                     HostelName = data[0]
                     errorMessage = "Your not From " + HostelName
@@ -199,7 +211,7 @@ def ScanForGate(Std_ID):
 def getMessHistory(ID):
     if request.method == 'GET':
         cur = mysql.connection.cursor()
-        cur.execute("SELECT me.Date , me.Type , mh.Food_Menu , mh.MS_ID FROM mess_entry as me , mess_history as mh , qr_for_mess as qr WHERE me.Student_ID = %s AND me.QR_ID = qr.QR_ID AND qr.Mess_ID = mh.Mess_ID AND me.Date = mh.Date AND me.Type = mh.Food_Type",(ID))
+        cur.execute("SELECT me.Date , me.Type , mh.Food_Menu , mh.MS_ID FROM mess_entry as me , mess_history as mh , qr_for_mess as qr WHERE me.Student_ID = %s AND me.QR_ID = qr.QR_ID AND qr.Mess_ID = mh.Mess_ID AND me.Date = mh.Date AND me.Type = mh.Food_Type",[ID])
         d = cur.fetchall()
         data = [dict(zip(("Date","Type","FoodMenu","MSID"),vv)) for vv in d]
         return jsonify(data)
@@ -208,7 +220,7 @@ def getMessHistory(ID):
 def getGateHistory(ID):
     if request.method == 'GET':
         cur = mysql.connection.cursor()
-        cur.execute("SELECT * FROM gate_entry WHERE student_id = %s",(ID))
+        cur.execute("SELECT * FROM gate_entry WHERE student_id = %s",[ID])
         d = cur.fetchall()
         data = [dict(zip(("QRSacnID","QRID","StudentID","Time","Date","Status"),vv)) for vv in d]
         return jsonify({"GateInfo":data})

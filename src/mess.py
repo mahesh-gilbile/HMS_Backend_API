@@ -162,7 +162,7 @@ def CheckQRTime() -> str:
     hour = int(time.strftime("%H", t))
     if(hour >= 9 and hour < 11):
         value = 'Breakfast'
-    elif(hour >= 13 and hour < 16):
+    elif(hour >= 12 and hour < 16):
         value = 'Lunch'
     elif(hour >= 20 and hour < 23):
         value = 'Dinner'

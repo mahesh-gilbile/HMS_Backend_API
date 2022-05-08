@@ -25,7 +25,7 @@ def change_pass(ID):
             return jsonify("Please Check Your Password!") , 404
         else:
             cur = mysql.connection.cursor()
-            cur.execute("SELECT Password FROM warden_details WHERE Warden_ID = %s",(ID))
+            cur.execute("SELECT Password FROM warden_details WHERE Warden_ID = %s",[ID])
             curr_pass = cur.fetchone()
             curr_pass = curr_pass[0]
             if curr_pass == currentPassword:
@@ -46,7 +46,7 @@ def getHostelDetails(Warden_ID):
         HostelID = data[0]
         HostelName = data[1]
         HostelDescription = data[2]
-        cur.execute("SELECT wing_id , wing_name FROM wing_details WHERE Hostel_ID = %s",(HostelID))
+        cur.execute("SELECT wing_id , wing_name FROM wing_details WHERE Hostel_ID = %s",[HostelID])
         data = cur.fetchall()
         Wing = [dict(zip(("Wing_ID","Wing_Name"),vv)) for vv in data]
         return jsonify({"HostelID" : HostelID , "HostelName" : HostelName , "HostelDescription" : HostelDescription , "WingDetails" : Wing})
@@ -55,14 +55,14 @@ def getHostelDetails(Warden_ID):
 def getWingDetails(Wing_ID):
     if request.method == 'GET':
         cur = mysql.connection.cursor()
-        cur.execute("SELECT wing_name , hostel_id FROM wing_details WHERE wing_id = %s",(Wing_ID))
+        cur.execute("SELECT wing_name , hostel_id FROM wing_details WHERE wing_id = %s",[Wing_ID])
         data = cur.fetchone()
         HostelID = data[1]
         WingName = data[0]
-        cur.execute("SELECT hostel_name FROM hostel_details WHERE hostel_id = %s",(HostelID))
+        cur.execute("SELECT hostel_name FROM hostel_details WHERE hostel_id = %s",[HostelID])
         data = cur.fetchone()
         HostelName = data[0]
-        cur.execute("SELECT * FROM room_details WHERE wing_id = %s",(Wing_ID))
+        cur.execute("SELECT * FROM room_details WHERE wing_id = %s",[Wing_ID])
         data = cur.fetchall()
         RoomDetails = [dict(zip(("Room_ID" , "Wing_ID" , "No_of_Beds" , "Description"),vv)) for vv in data]    
         return jsonify({"RoomDetails":RoomDetails , "WingName" : WingName , "HostelName" : HostelName })
@@ -71,14 +71,14 @@ def getWingDetails(Wing_ID):
 def getRoomDetails(Room_ID):
     if request.method == 'GET':
         cur = mysql.connection.cursor()
-        cur.execute("SELECT Wing_Name , hostel_id FROM wing_details WHERE (Wing_ID = (SELECT Wing_ID FROM room_details WHERE Room_ID = %s))",(Room_ID))
+        cur.execute("SELECT Wing_Name , hostel_id FROM wing_details WHERE (Wing_ID = (SELECT Wing_ID FROM room_details WHERE Room_ID = %s))",[Room_ID])
         data = cur.fetchone()
         HostelID = data[1]
         WingName = data[0]
-        cur.execute("SELECT hostel_name FROM hostel_details WHERE hostel_id = %s",(HostelID))
+        cur.execute("SELECT hostel_name FROM hostel_details WHERE hostel_id = %s",[HostelID])
         data = cur.fetchone()
         HostelName = data[0]
-        cur.execute("SELECT sd.Student_ID , sd.First_Name , sd.Middle_Name , sd.Last_Name , sd.Email , sd.Mobile_Number FROM student_details AS sd , room_allocate AS ra WHERE ra.Room_ID = %s  AND sd.Student_ID = ra.Student_ID",(Room_ID))
+        cur.execute("SELECT sd.Student_ID , sd.First_Name , sd.Middle_Name , sd.Last_Name , sd.Email , sd.Mobile_Number FROM student_details AS sd , room_allocate AS ra WHERE ra.Room_ID = %s  AND sd.Student_ID = ra.Student_ID",[Room_ID])
         data = cur.fetchall()
         Room_Mate_Details = [dict(zip(("Student_ID","First_Name","Middle_Name","Last_Name","Email","Mobile_Number"),vv)) for vv in data]
         return jsonify({"RoomID" : Room_ID[0] , "WingName" : WingName , "HostelName" : HostelName , "RoomMembers" : Room_Mate_Details}) , 200
@@ -98,7 +98,7 @@ def leaves(ID):
         return jsonify("Leaves Apply SuccessFully...!")
     elif request.method == 'GET':
         cur = mysql.connection.cursor()
-        cur.execute("SELECT * FROM `leaves` WHERE Staff_ID = %s AND Staff_Type = 'Warden'",(ID))
+        cur.execute("SELECT * FROM `leaves` WHERE Staff_ID = %s AND Staff_Type = 'Warden'",[ID])
         d = cur.fetchall()
         data = [dict(zip(("ID","StaffType","FromDate","ToDate","Day","Reason","Status","DescisionTakenByType","StaffID","DecisionTakenByID","DescisionTakenByName"),vv)) for vv in d]
         return jsonify(data)
@@ -122,7 +122,7 @@ def LeaveDecision(ID):
         Status = data.get('Status')
         DecisionTakenByType = data.get('DecisionTakenByType')
         cur = mysql.connection.cursor()
-        cur.execute("SELECT CONCAT(First_Name ,' ' , Middle_Name ,' ' , Last_Name) as Full_Name FROM warden_details WHERE Warden_ID = %s",(ID))
+        cur.execute("SELECT CONCAT(First_Name ,' ' , Middle_Name ,' ' , Last_Name) as Full_Name FROM warden_details WHERE Warden_ID = %s",[ID])
         name = cur.fetchone()
         cur.execute("UPDATE leaves SET Status = %s , Decision_takenby_type = %s , Decison_takenby_ID = %s , Decision_takenby_Name = %s WHERE ID = %s",(Status , DecisionTakenByType , ID , name , l_ID))
         mysql.connection.commit()
@@ -132,10 +132,10 @@ def LeaveDecision(ID):
 def getGateHistory(ID):
     if request.method == 'GET':
         cur = mysql.connection.cursor()
-        cur.execute("SELECT * FROM gate_entry WHERE student_id = %s",(ID))
+        cur.execute("SELECT * FROM gate_entry WHERE student_id = %s",[ID])
         d = cur.fetchall()
         data = [dict(zip(("QRSacnID","QRID","StudentID","Time","Date","Status"),vv)) for vv in d]
-        cur.execute("SELECT First_Name , Middle_Name , Last_Name FROM student_details WHERE student_id = %s",(ID))
+        cur.execute("SELECT First_Name , Middle_Name , Last_Name FROM student_details WHERE student_id = %s",[ID])
         d1 = cur.fetchall()
         data1 = [dict(zip(("FirstName","MiddleName","LastName"),vv)) for vv in d1]
         return jsonify({"GateInfo":data , "StudentName":data1[0]})
